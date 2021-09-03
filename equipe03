@@ -1,0 +1,31 @@
+pacman::p_load(car, caret, corrplot, data.table, dplyr, forcats, funModeling, mltools, randomForest, tidyverse)
+
+
+status(swiss)
+
+plot_num(swiss)
+profiling_num(swiss)
+
+particaoSwiss = createDataPartition(1:nrow(swiss), p=.7)
+treinoSwiss = swiss[particaoSwiss$Resample1, ] 
+testeSwiss = swiss[-particaoSwiss$Resample1, ] 
+
+corrplot(cor(treinoSwiss[ , c(1:6)]))
+
+train.control <- trainControl(method = "cv", number = 10) 
+swiss_LM <- train(Infant.Mortality ~ Fertility + Agriculture + Examination + Education + Catholic, data = swiss, method = "lm", trControl = train.control)
+
+print(swiss_LM)
+summary(swiss_LM)
+
+swiss_RF = randomForest(treinoSwiss[, c( 1, 2, 3, 4,  5)], treinoSwiss[ , 6], ntree = 100, keep.forest=T, keep.inbag = TRUE, importance=T) # floresta aleatória
+
+varImp(swiss_RF, scale = T)
+
+varImpPlot(swiss_RF, type=2)
+
+swiss_ADA <- train(Infant.Mortality ~ Fertility + Agriculture + Examination + Education + Catholic, data = swiss, method = "glmboost")
+
+plot(swiss_ADA)
+print(swiss_ADA)
+summary(swiss_ADA)
